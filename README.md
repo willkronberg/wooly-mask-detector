@@ -1,5 +1,7 @@
 # wooly-mask-detector
 
+![plot](./output/mask-detector-test-sm-cropped.gif)
+
 ## Description
 A small app that determines if the user is wearing a face mask or not.
 
