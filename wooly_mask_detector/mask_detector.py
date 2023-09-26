@@ -1,67 +1,40 @@
 import cv2
 import numpy as np
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, Flatten, Dropout, Dense
-
+import tensorflow as tf
 
 def detect_masks():
-    cnn = Sequential(
-        [
-            Conv2D(filters=100, kernel_size=(3, 3), activation="relu"),
-            MaxPooling2D(pool_size=(2, 2)),
-            Conv2D(filters=100, kernel_size=(3, 3), activation="relu"),
-            MaxPooling2D(pool_size=(2, 2)),
-            Flatten(),
-            Dropout(0.5),
-            Dense(50),
-            Dense(35),
-            Dense(2),
-        ]
-    )
-
-    cnn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["acc"])
-
-    labels_dict = {0: "No mask", 1: "Mask"}
-    color_dict = {0: (0, 0, 255), 1: (0, 255, 0)}
-    img_size = 4
-
-    camera = cv2.VideoCapture(-1)
-    classifier = cv2.CascadeClassifier(
+    camera = cv2.VideoCapture(0)
+    face_cascade = cv2.CascadeClassifier(
         cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     )
+    mask_classifier = tf.keras.models.load_model('wooly_mask_detector/models/maskclassifier.model', compile=False)
 
     while True:
-        (rval, im) = camera.read()
+        _, frame = camera.read()
 
-        if not im:
-            raise Exception(f"Could not take a picture. - {rval}")
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
-        im = cv2.flip(im, 1, 1)
-        imgs = cv2.resize(im, (im.shape[1] // img_size, im.shape[0] // img_size))
-        face_rec = classifier.detectMultiScale(imgs)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
 
-        for i in face_rec:
-            (x, y, l, w) = [v * img_size for v in i]
-            face_img = im[y : y + w, x : x + l]  # noqa: E203
-            resized = cv2.resize(face_img, (150, 150))
-            normalized = resized / 255.0
-            reshaped = np.reshape(normalized, (1, 150, 150, 3))
-            reshaped = np.vstack([reshaped])
-            result = cnn.predict(reshaped)
-            label = np.argmax(result, axis=1)[0]
-            cv2.rectangle(im, (x, y), (x + l, y + w), color_dict[label], 2)
-            cv2.rectangle(im, (x, y - 40), (x + l, y), color_dict[label], -1)
-            cv2.putText(
-                im,
-                labels_dict[label],
-                (x, y - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                (255, 255, 255),
-                2,
-            )
+        for (x, y, h, w) in faces:
+            face_roi = frame[y : y + h, x : x + w, :]
+            face_roi = cv2.resize(face_roi, (160, 160))
+            face_roi = tf.keras.preprocessing.image.img_to_array(face_roi)
+            face_roi = face_roi.reshape(1, 160, 160, 3)
 
-        cv2.imshow("LIVE", im)
+            prediction = mask_classifier(face_roi)
+            (without_mask, with_mask) = prediction[0].numpy()
+
+            (label, color, prob) = ('Mask', (0, 255, 0), with_mask*100.0) if with_mask > without_mask else ('No mask', (0, 0, 255), without_mask*100.0)
+
+            cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+            cv2.rectangle(frame, (x + 15, y + 2), (x + w - 15, y + 20), (0, 0, 0), -1) #lower
+            cv2.rectangle(frame, (x + 15, y - 2), (x + w - 15, y - 20), (0, 0, 0), -1) #upper
+
+            cv2.putText(frame, str(prob)+' %', (x + 20, y - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
+            cv2.putText(frame, label, (x + 20, y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
+            
+        cv2.imshow("LIVE", frame)
 
         key = cv2.waitKey(10)
         if key == 27:  # The Escape Key

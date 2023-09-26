@@ -8,9 +8,14 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 opencv-python = "^4.8.0.76"
-tensorflow = "^2.13.0"
+tensorflow = "^2.12.0-rc1"
+tensorflow-io-gcs-filesystem = "^0.31.0"
 opencv-python-headless = "^4.8.0.76"
 opencv-contrib-python = "^4.8.0.76"
+pip = "^23.2.1"
+pandas = "^2.1.1"
+matplotlib = "^3.8.0"
+keras = "^2.12.0rc1"
 
 
 [build-system]
@@ -19,3 +24,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 mask-detector = "wooly_mask_detector.mask_detector:detect_masks"
+train-model = "wooly_mask_detector.mask_classifier:train_model"
