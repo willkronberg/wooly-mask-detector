@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "wooly-mask-detector"
+version = "0.1.0"
+description = ""
+authors = ["Will Kronberg <will@willkronberg.dev>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+opencv-python = "^4.8.0.76"
+tensorflow = "^2.13.0"
+opencv-python-headless = "^4.8.0.76"
+opencv-contrib-python = "^4.8.0.76"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+mask-detector = "wooly_mask_detector.mask_detector"
