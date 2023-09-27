@@ -215,6 +215,30 @@ files = [
 ]
 
 [[package]]
+name = "ffmpeg"
+version = "1.4"
+description = "ffmpeg python package url [https://github.com/jiashaokun/ffmpeg]"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ffmpeg-1.4.tar.gz", hash = "sha256:6931692c890ff21d39938433c2189747815dca0c60ddc7f9bb97f199dba0b5b9"},
+]
+
+[[package]]
+name = "ffmpegcv"
+version = "0.3.7"
+description = ""
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "ffmpegcv-0.3.7-py3-none-any.whl", hash = "sha256:cb2baaa06f94999ececf5c0839578dc81f8b16cf8b734a622f06a13ce431dce4"},
+    {file = "ffmpegcv-0.3.7.tar.gz", hash = "sha256:d02febba09d41220f8dbb0dd952b9ae78ac2226b55ed22189b7332514ef813b8"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[[package]]
 name = "flatbuffers"
 version = "23.5.26"
 description = "The FlatBuffers serialization format for Python"
@@ -1587,4 +1611,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "d99b566554958c667739cf64f23dd566de7231115da1635e35489f5330e0029f"
+content-hash = "9f0ad79e6a69a5f7a012692a5d93a365ecc0d0266646635f84c852fc83c83e6b"

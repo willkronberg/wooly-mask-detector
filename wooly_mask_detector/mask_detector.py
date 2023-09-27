@@ -1,14 +1,31 @@
+import os
+
+os.environ["OPENCV_FFMPEG_DEBUG"] = "1"
+os.environ["OPENCV_LOG_LEVEL"] = "DEBUG"
+os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp|vcodec;h264"
+
 import cv2
 import tensorflow as tf
 
 
 def detect_masks():
-    camera = cv2.VideoCapture(0)
+    #  camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture("#", cv2.CAP_FFMPEG)
+
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
     mask_classifier = tf.keras.models.load_model("wooly_mask_detector/models/maskclassifier.model", compile=False)
 
     while True:
-        _, frame = camera.read()
+        is_valid, frame = camera.read()
+
+        if not is_valid:
+            camera.release()
+            camera = cv2.VideoCapture("#", cv2.CAP_FFMPEG)
+            continue
+
+        ratio = 1000.0 / frame.shape[1]
+        dimension = (1000, int(frame.shape[0] * ratio))
+        frame = cv2.resize(frame, dimension, interpolation=cv2.INTER_AREA)
 
         gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
